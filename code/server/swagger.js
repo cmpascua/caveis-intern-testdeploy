@@ -59,6 +59,14 @@ const options = {
             name: 'Sampling Point',
             description: 'APIs for managing sampling point information'
         },    
+        {
+            name: 'Institution',
+            description: 'APIs for managing institution information'
+        },
+        {
+            name: 'Collection',
+            description: 'APIs for managing collection information'
+        },
     ],
     paths: {
       "/register": {
@@ -4317,6 +4325,720 @@ const options = {
           ]
         }
       },
+
+
+
+
+
+
+      "/institution": {
+        "get": {
+          "tags": ["Institution"],
+          "summary": "Get all institution",
+          "description": "Returns all institution in the database.",
+          "operationId": "getAllInstitution",
+          "produces": ["application/json"],
+          "parameters": [
+              {
+                "name": "page",
+                "in": "query",
+                "description": "Page number for pagination",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "default": 1
+                }
+              },
+              {
+                "name": "limit",
+                "in": "query",
+                "description": "Number of items to return per page",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+          ],
+          "responses": {
+              "200": {
+                "description": "Successful response",
+                "content": {
+                  "application/json": {
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "$ref": "#/components/schemas/Institution"
+                          }
+                      }
+                  }
+                }      
+              },
+              "204": {
+                "description": "No institution found",
+                "content": {
+                  "application/json": {
+                    "example": {
+                      "isolates": [],
+                    }
+                  }
+                }
+              },
+              "401": {
+                "description": "Unauthorized",
+                "content": {
+                  "application/json": {
+                    "example": {
+                      "error": "Unauthorized",
+                      "message": "User is not authorized to access this resource."
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal Server Error",
+                "content": {
+                  "application/json": {
+                    "example": {
+                      "error": "Internal Server Error",
+                      "message": "An internal server error occurred while processing the request."
+                    }
+                  }
+                }
+              }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+      "/institution/create": {
+        "post": {
+          "tags": ["Institution"],
+          "summary": "Create new institution",
+          "description": "Creates a new institution in the database",
+          "operationId": "createInstitution",
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "requestBody": {
+            "description": "Institution data for creation",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "institution_code": { "type": "string" },
+                    "institution_name": { "type": "string" }
+                  },
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Institution Created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "Institution successfully created." }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "Missing required field."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Unauthorized",
+                    "message": "User is not authorized to access this resource."
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Cave with specified name not found."
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Conflict",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Conflict",
+                    "message": "Institution with specified cave_id and description already exists."
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Internal Server Error",
+                    "message": "An internal server error occurred while processing the request."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+      "/institution/update/{id}": {
+        "patch": {
+          "tags": ["Institution"],
+          "summary": "Update institution by ID",
+          "description": "Updates an existing institution in the database by ID",
+          "operationId": "updateInstitution",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID of the institution to be updated",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "requestBody": {
+            "description": "Institution data for update",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Institution Updated",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "Institution successfully updated." }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "No data provided for update."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Unauthorized",
+                    "message": "User is not authorized to access this resource."
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Institution with specified ID not found."
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Internal Server Error",
+                    "message": "An internal server error occurred while processing the request."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+      "/institution/delete/{id}": {
+        "delete": {
+          "tags": ["Institution"],
+          "summary": "Delete institution by ID",
+          "description": "Deletes a institution based on the provided ID.",
+          "operationId": "deleteInstitution",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID of the institution to be deleted",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Institution Deleted",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Institution successfully deleted."
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Institution with the provided ID not found in the database."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Unauthorized",
+                    "message": "User is not authorized to delete this resource."
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Internal Server Error",
+                    "message": "An internal server error occurred while processing the request."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+
+
+
+
+      "/collection": {
+        "get": {
+          "tags": ["Collection"],
+          "summary": "Get all collection",
+          "description": "Returns all collection in the database.",
+          "operationId": "getAllCollection",
+          "produces": ["application/json"],
+          "parameters": [
+              {
+                "name": "page",
+                "in": "query",
+                "description": "Page number for pagination",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "default": 1
+                }
+              },
+              {
+                "name": "limit",
+                "in": "query",
+                "description": "Number of items to return per page",
+                "required": false,
+                "schema": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+          ],
+          "responses": {
+              "200": {
+                "description": "Successful response",
+                "content": {
+                  "application/json": {
+                      "schema": {
+                          "type": "array",
+                          "items": {
+                              "$ref": "#/components/schemas/Collection"
+                          }
+                      }
+                  }
+                }      
+              },
+              "204": {
+                "description": "No sampling points found",
+                "content": {
+                  "application/json": {
+                    "example": {
+                      "isolates": [],
+                    }
+                  }
+                }
+              },
+              "401": {
+                "description": "Unauthorized",
+                "content": {
+                  "application/json": {
+                    "example": {
+                      "error": "Unauthorized",
+                      "message": "User is not authorized to access this resource."
+                    }
+                  }
+                }
+              },
+              "500": {
+                "description": "Internal Server Error",
+                "content": {
+                  "application/json": {
+                    "example": {
+                      "error": "Internal Server Error",
+                      "message": "An internal server error occurred while processing the request."
+                    }
+                  }
+                }
+              }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+      "/collection/create": {
+        "post": {
+          "tags": ["Collection"],
+          "summary": "Create new collection",
+          "description": "Creates a new collection in the database",
+          "operationId": "createCollection",
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "requestBody": {
+            "description": "Collection data for creation",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" }
+                  },
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Collection Created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "Collection successfully created." }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "Missing required field."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Unauthorized",
+                    "message": "User is not authorized to access this resource."
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Cave with specified name not found."
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Conflict",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Conflict",
+                    "message": "Collection with specified cave_id and description already exists."
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Internal Server Error",
+                    "message": "An internal server error occurred while processing the request."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+      "/collection/update/{id}": {
+        "patch": {
+          "tags": ["Collection"],
+          "summary": "Update collection by ID",
+          "description": "Updates an existing collection in the database by ID",
+          "operationId": "updateCollection",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID of the collection to be updated",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "requestBody": {
+            "description": "Collection data for update",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Collection Updated",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": { "type": "string", "example": "Collection successfully updated." }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Bad Request",
+                    "message": "No data provided for update."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Unauthorized",
+                    "message": "User is not authorized to access this resource."
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Collection with specified ID not found."
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Internal Server Error",
+                    "message": "An internal server error occurred while processing the request."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
+      "/collection/delete/{id}": {
+        "delete": {
+          "tags": ["Collection"],
+          "summary": "Delete collection by ID",
+          "description": "Deletes a collection based on the provided ID.",
+          "operationId": "deleteCollection",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID of the collection to be deleted",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Collection Deleted",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Collection successfully deleted."
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Not Found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Not Found",
+                    "message": "Collection with the provided ID not found in the database."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Unauthorized",
+                    "message": "User is not authorized to delete this resource."
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "error": "Internal Server Error",
+                    "message": "An internal server error occurred while processing the request."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Authentication": []
+            }
+          ]
+        }
+      },
     },
     components: {
       "securitySchemes": {
@@ -4334,8 +5056,12 @@ const options = {
                       "type": "integer",
                       "description": "The unique identifier for the isolate"
                   },
+                  "accession_no": {
+                      "type": ["string", "null"],
+                      "description": "The unique and more meaningful identifier for isolate"
+                  },
                   "code": {
-                      "type": "string",
+                      "type": ["string", "null"],
                       "description": "The unique code for the isolate"
                   },
                   "genus": {
@@ -4346,29 +5072,54 @@ const options = {
                       "type": "string",
                       "description": "The species of the isolate"
                   },
-                  "organism": {
+                  "isolate_domain": {
+                      "type": "string",
+                      "description": "The domain(taxonomy) of the isolate"
+                  },
+                  "isolate_phylum": {
+                      "type": "string",
+                      "description": "The phylum(taxonomy) of the isolate"
+                  },
+                  "isolate_class": {
+                      "type": "string",
+                      "description": "The class(taxonomy) of the isolate"
+                  },
+                  "isolate_order": {
+                      "type": "string",
+                      "description": "The order(taxonomy) of the isolate"
+                  },
+                  "isolate_family": {
+                      "type": "string",
+                      "description": "The family(taxonomy) of the isolate"
+                  },
+                  "organism_id": {
                       "$ref": "#/components/schemas/Organism",
                   },
-                  "sample": {
+                  "sample_id": {
                       "$ref": "#/components/schemas/Sample",
                   },
-                  "host": {
+                  "host_id": {
                       "$ref": "#/components/schemas/Host",
                   },
                   "method_id": {
+                      "type": ["integer", "null"],
                       "$ref": "#/components/schemas/Method",
                   },
-                  "cave": {
+                  "cave_id": {
                     "$ref": "#/components/schemas/Cave",
                   },
-                  "sampling_point": {
+                  "sampling_point_id": {
                       "$ref": "#/components/schemas/SamplingPoint",
                   },
-                  "institution": {
+                  "institution_id": {
                       "$ref": "#/components/schemas/Institution",
                   },
-                  "collection": {
+                  "collection_id": {
                       "$ref": "#/components/schemas/Collection",
+                  },
+                  "image_ref": {
+                      "type": ["string", "null"],
+                      "format": "uuid",
                   },
                   "access_level": {
                       "type": "string",
@@ -4472,11 +5223,11 @@ const options = {
                       "type": "string",
                       "description": "The code of the cave"
                   },
-                  "name": {
+                  "cave_name": {
                       "type": "string",
                       "description": "The name of the cave"
                   },
-                  "location": {
+                  "location_id": {
                       "$ref": "#/components/schemas/Location",
                   },
               }
@@ -4505,7 +5256,7 @@ const options = {
                       "type": "string",
                       "description": "The code of the institution"
                   },
-                  "name": {
+                  "institution_name": {
                       "type": "string",
                       "description": "The name of the institution"
                   },
@@ -4518,11 +5269,11 @@ const options = {
                       "type": "integer",
                       "description": "The unique identifier for the collection"
                   },
-                  "colllection_code": {
+                  "collection_code": {
                       "type": "string",
                       "description": "The code of the collection"
                   },
-                  "name": {
+                  "collection_name": {
                       "type": "string",
                       "description": "The name of the collection"
                   },
