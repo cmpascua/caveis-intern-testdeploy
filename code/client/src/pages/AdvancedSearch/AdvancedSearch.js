@@ -24,6 +24,7 @@ import {
   PlusOutlined,
   RightOutlined,
   SearchOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../context/AuthContext";
 import { useUser } from "../../context/UserContext";
@@ -606,6 +607,20 @@ const AdvancedSearch = () => {
             >
               Create
             </Button>
+
+
+            {/* Button for .csv file upload*/}
+            <Button
+              className="advsearch-add-btn"
+              icon={<UploadOutlined />}
+              size="large"
+              style={{ display: authenticated ? "inline-block" : "none" }}
+              onClick={() => navigate("/isolate/create")}
+            >
+              Upload .csv
+            </Button>
+            {/* */}
+
             <Input
               className="advsearch-search-bar"
               placeholder="Search isolates"
