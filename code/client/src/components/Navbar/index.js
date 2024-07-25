@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Layout, Button, Divider, Drawer } from "antd";
 import LeftMenu from "./LeftMenu";
 import RightMenu from "./RightMenu";
+import NotificationBell from './NotificationBell';
+import { useNotifications } from '../../context/NotificationContext';
 import { MenuOutlined } from "@ant-design/icons";
 import "./Navbar.css";
 
 const Navbar = () => {
+  const { notifications } = useNotifications();
+
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const showDrawer = () => {
@@ -54,7 +58,8 @@ const Navbar = () => {
           >
             <LeftMenu className="lm-inline" mode={"inline"} onClose={onClose} />
             <Divider className="navbar-divider" />
-            <RightMenu mode={"inline"} onClose={onClose} />
+            <NotificationBell notifications={notifications} />
+            <RightMenu mode={"horizontal"} onClose={onClose} />
           </Drawer>
         </Layout.Header>
       </Layout>

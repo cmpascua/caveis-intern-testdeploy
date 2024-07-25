@@ -107,15 +107,50 @@
 
 /* RightMenu Horizontal */
 
-.rm-h-btn {
-  margin-top: -10px;
-  margin-right: -15px;
-  color: white;
-  padding: 16px;
+.notification-popover,
+.avatar-popover {
+  z-index: 1000;
+}
+
+.notification-popover .ant-popover-inner {
+  border-radius: 12px;  
+  overflow: hidden;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+.avatar-popover .ant-popover-inner {border-radius: 12px;  
+  border-radius: 12px;  
+  overflow: hidden;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  padding: 0;
+}
+
+.notification-popover .ant-popover-arrow,
+.avatar-popover .ant-popover-arrow {
+  display: none;
+}
+
+.notification-popover .ant-popover-inner-content,
+.avatar-popover .ant-popover-inner-content {
+  padding: 0;
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0 16px;
+}
+
+.notification-list .ant-list-item {
+  padding: 12px 0;
+}
+
+.notification-list .ant-list-item-meta-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.notification-list .ant-list-item-meta-description {
   font-size: 16px;
-  border: none;
-  cursor: pointer;
-  margin-left: auto;
 }
 
 .rm-h-dropdown {
@@ -124,98 +159,72 @@
   display: inline-block;
 }
 
-.rm-h-profile, .rm-h-user-details {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.rm-h-dropdown-content {
+  width: 280px;
 }
 
 .rm-h-profile {
-  padding: 5px 30px 0 30px;
-}
-
-.rm-h-user-details {
-  margin-bottom: 10px;
-}
-
-.rm-h-avatar {
-  border-radius: 50%;
-  border: 2px solid #000000;
+  background-color: #A2B68C;
+  padding: 20px;
+  text-align: center;
 }
 
 .rm-h-role {
-  font-size: large;
-  font-weight: bold;
+  display: block;
   color: white;
-  font-family: "Raleway";
-  letter-spacing: 1px;
-  margin-bottom: -10px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.rm-h-avatar {
+  margin-bottom: 15px;
+}
+
+.rm-h-user-details {
+  color: white;
 }
 
 .rm-h-name {
-  font-size: large;
-  font-weight: 800;
-  margin-bottom: -20px;
-  font-family: "Raleway";
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
 .rm-h-email {
-  font-size: large;
-  line-height: 1.5;
-  text-align: center;
-  color: #818080;
-  font-family: "Raleway";
-}
-
-.rm-h-dropdown-content {
-  margin-right: -15px;
-  display: none;
-  position: absolute;
-  background-color: #fefefe;
-  border-radius: 10px;
-  min-width: 290px;
-  overflow: auto;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  right: 0;
-  z-index: 1;
-}
-
-.rm-h-dropdown-content a {
-  color: black;
-  padding: 0px 16px;
-  text-decoration: none;
   display: block;
-}
-
-.rm-h-dropdown-content a:hover {
-  background-color: #ddd;
-}
-
-.rm-h-dropdown-content.show {
-  display: block;
-  background: linear-gradient(to bottom, #A2B68C 0%, #A2B68C 90px, #ffffff 45px, #ffffff 100%);
-  text-align: center;
+  font-size: 16px;
 }
 
 .rm-h-options {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.rm-h-settings-btn,
+.rm-h-signout-btn {
+  width: 48%;
+  height: 40px;
+  font-size: 16px;
+}
+
+.rm-h-dropdown {
+  display: flex;
   align-items: center;
-  text-align: center;
-  padding: 0 32px;
-  width: 100%;
-  margin-bottom: 35px;
 }
 
-.rm-h-manage {
-  width: 100%;
-  margin: -10px 0 -5px;
+.notification-bell {
+  margin-top: 5px;
+  margin-right: 24px;
 }
 
-.rm-h-manage-btn {
-  width: 100%;
+/* Styles for signed out state */
+.rm-signin-text {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .rm-h-manage-btn.active,

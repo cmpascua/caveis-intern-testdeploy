@@ -28,6 +28,7 @@ import {
   handleCapitalize,
 } from "../../utils/isolateUtils";
 import { useUser } from "../../context/UserContext";
+import { useNotifications } from "../../context/NotificationContext";
 import { setSelectOptions } from "../../utils/isolateUtils";
 import { createIsolate } from "../../utils/api/createApi";
 import { getCookie } from "../../utils/cookieUtils";
@@ -40,6 +41,7 @@ const backendUrl = process.env.REACT_APP_BACKEND_URL;
 const CreateIsolate = () => {
   const navigate = useNavigate();
   const { authenticated } = useContext(AuthContext);
+  const { addNotification } = useNotifications();
   const { user } = useUser();
   const [form] = Form.useForm();
   const { uniqueHosts, uniqueHostGenusSpecies } = useContext(HostContext);
@@ -211,11 +213,20 @@ const CreateIsolate = () => {
         await uploadImage(newIsolate.id, values.imageFile.file);
       }
 
+      addNotification({
+        title: "Isolate Created",
+        content: `A new isolate has been successfully created.`
+      });
+
       navigate(`/isolate/${newIsolate.id}`);
       setIsolateProperties({});
     } catch (error) {
       console.log("Error in creating isolate:", error);
       createError(error);
+      addNotification({
+        title: "Create Failed",
+        content: "An error occurred while creating the isolate."
+      });
       setConfirmCreate(false);
     }
     setLoadingCreate(false);

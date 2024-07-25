@@ -35,6 +35,7 @@ import { getAllIsolates, getIsolateById } from "../../utils/api/getApi";
 import { deleteIsolate } from "../../utils/api/deleteApi";
 import { getCookie } from "../../utils/cookieUtils";
 import { applyFilters } from "../../utils/isolateUtils";
+import { useNotifications } from "../../context/NotificationContext";
 import Error from "../Error/Error";
 import "./AdvancedSearch.css";
 
@@ -46,6 +47,7 @@ const AdvancedSearch = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { authenticated } = useContext(AuthContext);
+  const { addNotification } = useNotifications();
   const { caves, samplingPoints, locationMap, uniqueLocations } =
     useContext(LocationContext);
   const { organisms, organismTypeMap, uniqueOrganisms } =
@@ -281,7 +283,12 @@ const AdvancedSearch = () => {
   };
 
   const handleExportMenuClick = (e) => {
-    if (e.key === "2") {
+    if (e.key === "1") {
+      addNotification({
+        title: "Export Successful",
+        content: `Exported ${selectedRecords.length} records successfully.`
+      });
+    } else if (e.key === "2") {
       openDeleteModal();
     }
   };
@@ -329,6 +336,10 @@ const AdvancedSearch = () => {
         type: "success",
         content: "Isolate/s deleted successfully.",
       });
+      addNotification({
+        title: "Delete Successful",
+        content: `Deleted ${selectedRowKeys.length} isolate(s) successfully.`
+      });
       const updatedIsolates = filteredIsolates.filter(
         (isolate) => !selectedRowKeys.includes(isolate.id)
       );
@@ -336,6 +347,10 @@ const AdvancedSearch = () => {
     } catch (error) {
       setDeleteIsolateErrorMessage(error.response.data.message);
       setDeleteIsolateModalOpen(false);
+      addNotification({
+        title: "Delete Failed",
+        content: "An error occurred while deleting isolates."
+      });
     }
     setLoadingDeleteIsolate(false);
   };

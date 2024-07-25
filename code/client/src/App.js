@@ -12,6 +12,7 @@ import { LocationProvider } from "./context/LocationContext";
 import { IsolateProvider } from "./context/IsolateContext";
 import { InstitutionProvider } from "./context/InstitutionContext";
 import { CollectionProvider } from "./context/CollectionContext";
+import { NotificationProvider } from './context/NotificationContext';
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home/Home";
 import Settings from "./pages/Settings/Settings";
@@ -43,65 +44,67 @@ const App = () => {
       }}
     >
       <AuthProvider>
-        <IsolateProvider>
-          <HostProvider>
-            <OrganismProvider>
-              <SampleProvider>
-                <MethodProvider>
-                  <InstitutionProvider>
-                    <CollectionProvider>
-                      <LocationProvider>
-                        <>
-                          <Navbar />
-                          <Routes>
-                            <Route path="/" element={<Home />} />
-                            <Route
-                              path="/settings"
-                              element={
-                                <PrivateRoute>
-                                  <Settings />
-                                </PrivateRoute>
-                              }
-                            />
-                            <Route
-                              path="/manage-metadata"
-                              element={
-                                <PrivateRoute>
-                                  <ManageMetadata />
-                                </PrivateRoute>
-                              }
-                            />
-                            <Route
-                              path="/advsearch"
-                              element={<AdvancedSearch />}
-                            />
-                            <Route
-                              path="/isolate/:code"
-                              element={<Isolate />}
-                            />
-                            <Route
-                              path="/isolate/create"
-                              element={
-                                <PrivateRoute>
-                                  <CreateIsolate />
-                                </PrivateRoute>
-                              }
-                            />
-                            <Route
-                              path="/taxonomic-tree"
-                              element={<TaxonomicTree />}
-                            />
-                            <Route path="*" element={<Error type={404} />} />
-                          </Routes>
-                        </>
-                      </LocationProvider>
-                    </CollectionProvider>
-                  </InstitutionProvider>
-                </MethodProvider>
-              </SampleProvider>
-            </OrganismProvider>
-          </HostProvider>
-        </IsolateProvider>
+        <NotificationProvider>
+          <IsolateProvider>
+            <HostProvider>
+              <OrganismProvider>
+                <SampleProvider>
+                  <MethodProvider>
+                    <InstitutionProvider>
+                      <CollectionProvider>
+                        <LocationProvider>
+                          <>
+                            <Navbar />
+                            <Routes>
+                              <Route path="/" element={<Home />} />
+                              <Route
+                                path="/settings"
+                                element={
+                                  <PrivateRoute>
+                                    <Settings />
+                                  </PrivateRoute>
+                                }
+                              />
+                              <Route
+                                path="/manage-metadata"
+                                element={
+                                  <PrivateRoute>
+                                    <ManageMetadata />
+                                  </PrivateRoute>
+                                }
+                              />
+                              <Route
+                                path="/advsearch"
+                                element={<AdvancedSearch />}
+                              />
+                              <Route
+                                path="/isolate/:code"
+                                element={<Isolate />}
+                              />
+                              <Route
+                                path="/isolate/create"
+                                element={
+                                  <PrivateRoute>
+                                    <CreateIsolate />
+                                  </PrivateRoute>
+                                }
+                              />
+                              <Route
+                                path="/taxonomic-tree"
+                                element={<TaxonomicTree />}
+                              />
+                              <Route path="*" element={<Error type={404} />} />
+                            </Routes>
+                          </>
+                        </LocationProvider>
+                      </CollectionProvider>
+                    </InstitutionProvider>
+                  </MethodProvider>
+                </SampleProvider>
+              </OrganismProvider>
+            </HostProvider>
+          </IsolateProvider>
+        </NotificationProvider>
       </AuthProvider>
     </ConfigProvider>
   );
