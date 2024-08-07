@@ -2,6 +2,25 @@ import axios from "axios";
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
+// export const createIsolate = async (accessToken, values) => {
+//   try {
+//     const config = {
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`,
+//       },
+//     };
+
+//     const response = await axios.post(
+//       `${backendUrl}/isolate/create`,
+//       values,
+//       config
+//     );
+//     return response.data.data;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
 export const createIsolate = async (accessToken, values) => {
   try {
     const config = {
@@ -10,6 +29,8 @@ export const createIsolate = async (accessToken, values) => {
       },
     };
 
+    console.log("Sending data to server:", values);
+
     const response = await axios.post(
       `${backendUrl}/isolate/create`,
       values,
@@ -17,6 +38,10 @@ export const createIsolate = async (accessToken, values) => {
     );
     return response.data.data;
   } catch (error) {
+    console.error("Error in createIsolate:", error.response ? error.response.data : error.message);
+    if (error.response && error.response.data) {
+      console.error("Server error details:", error.response.data);
+    }
     throw error;
   }
 };
