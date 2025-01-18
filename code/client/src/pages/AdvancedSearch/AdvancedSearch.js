@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Papa from "papaparse";
 import { CSVLink } from "react-csv";
 import { createIsolate } from '../../utils/api/createApi'; 
 import Papa from "papaparse";
@@ -34,6 +35,7 @@ import { LocationContext } from "../../context/LocationContext";
 import { OrganismContext } from "../../context/OrganismContext";
 import { SampleContext } from "../../context/SampleContext";
 import { getAllIsolates, getIsolateById } from "../../utils/api/getApi";
+import { createIsolate } from "../../utils/api/createApi";
 import { deleteIsolate } from "../../utils/api/deleteApi";
 import { getCookie } from "../../utils/cookieUtils";
 import { applyFilters } from "../../utils/isolateUtils";
@@ -541,6 +543,92 @@ const AdvancedSearch = () => {
       } else {
         console.error("Error retrieving isolate:", error);
       }
+    }
+  };
+
+  const handleCSVUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        complete: async (results) => {
+          const isolates = results.data;
+          let successCount = 0;
+          let errorCount = 0;
+          let errors = [];
+  
+          for (const rawIsolate of isolates) {
+            const isolate = {
+              genus: rawIsolate.genus,
+              species: rawIsolate.species,
+              isolate_domain: rawIsolate.isolate_domain || "Not specified",
+              isolate_phylum: rawIsolate.isolate_phylum || "Not specified",
+              isolate_class: rawIsolate.isolate_class || "Not specified",
+              isolate_order: rawIsolate.isolate_order || "Not specified",
+              isolate_family: rawIsolate.isolate_family || "Not specified",
+              organism_type: rawIsolate.organism_type,
+              sample_type: rawIsolate.sample_type,
+              host_type: rawIsolate.host_type,
+              host_genus: rawIsolate.host_genus,
+              host_species: rawIsolate.host_species,
+              method: rawIsolate.method,
+              institution_name: rawIsolate.institution_name,
+              collection_name: rawIsolate.collection_name,
+              cave_name: rawIsolate.cave_name,
+              description: rawIsolate.description || "Default sampling point",
+              access_level: rawIsolate.access_level || "Public",
+            };
+  
+            Object.keys(isolate).forEach(key => isolate[key] === undefined && delete isolate[key]);
+  
+            console.log("Isolate data being sent:", isolate);
+  
+            const requiredFields = [
+              'genus', 'species', 'organism_type', 'sample_type',
+              'host_type', 'host_genus', 'host_species', 'method', 'institution_name',
+              'collection_name', 'cave_name'
+            ];
+  
+            const missingFields = requiredFields.filter(field => !isolate[field]);
+  
+            if (missingFields.length > 0) {
+              errorCount++;
+              errors.push({ message: `Missing required fields: ${missingFields.join(', ')}` });
+              continue;
+            }
+  
+            try {
+              await createIsolate(accessToken, isolate);
+              successCount++;
+            } catch (error) {
+              console.error("Error creating isolate:", error);
+              errorCount++;
+              errors.push({ message: error.response?.data?.message || error.message || 'Unknown error occurred' });
+            }
+          }
+  
+          if (successCount > 0) {
+            messageApi.open({
+              type: "success",
+              content: `Successfully created ${successCount} isolates.`,
+            });
+          }
+  
+          if (errorCount > 0) {
+            messageApi.open({
+              type: "error",
+              content: `Failed to create ${errorCount} isolates. Check console for details.`,
+            });
+            console.error("Errors during isolate creation:", errors);
+          }
+  
+          await getAllIsolates(accessToken, setIsolates);
+        },
+        error: (error) => {
+          console.error("Error parsing CSV:", error);
+          showError(`Error parsing CSV: ${error.message}`);
+        },
+      });
     }
   };
 

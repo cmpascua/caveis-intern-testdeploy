@@ -201,6 +201,7 @@ const CreateIsolate = () => {
   };
 
   const handleCreateIsolate = async (values) => {
+    console.log(values);
     setLoadingCreate(true);
     try {
       const [host_genus, host_species] = values.host_genus_species.split(" ");
