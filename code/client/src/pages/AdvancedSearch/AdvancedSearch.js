@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CSVLink } from "react-csv";
+import { createIsolate } from '../../utils/api/createApi'; 
+import Papa from "papaparse";
 import {
   Button,
   Card,
@@ -17,7 +19,7 @@ import {
   Tag,
 } from "antd";
 import {
-  DeleteOutlined,
+  DeleteOutlined, 
   DownOutlined,
   ExportOutlined,
   InfoCircleOutlined,
@@ -58,6 +60,7 @@ const AdvancedSearch = () => {
   const [loadingDeleteIsolate, setLoadingDeleteIsolate] = useState(false);
   const [deleteIsolateErrorMessage, setDeleteIsolateErrorMessage] =
     useState("");
+  const [uploadCSVModalOpen, setUploadCSVModalOpen] = useState(false);  //
   const [isolates, setIsolates] = useState([]);
   const [loadingIsolates, setLoadingIsolates] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -76,6 +79,10 @@ const AdvancedSearch = () => {
   );
   const [collapse, setCollapse] = useState(false);
   const [openPanels, setOpenPanels] = useState([]);
+  const [csvData, setCSVData] = useState({});
+  const [csvFile, setCSVFile] = useState({});
+  const [contentModalOpen, setContentModalOpen] = useState(false);
+  const [fileSelected, setFileSelected] = useState(false);
 
   useEffect(() => {
     if (deleteIsolateErrorMessage) {
@@ -181,6 +188,15 @@ const AdvancedSearch = () => {
   };
   const closeDeleteModal = () => {
     setDeleteIsolateModalOpen(false);
+  };
+
+
+  // added
+  const openUploadCSVModal = () => {
+    setUploadCSVModalOpen(true);
+  };
+  const closeUploadCSVModal = () => {
+    setUploadCSVModalOpen(false);
   };
 
   const onSelectChange = (record, selected) => {
@@ -353,6 +369,130 @@ const AdvancedSearch = () => {
       });
     }
     setLoadingDeleteIsolate(false);
+  };
+
+  // handle CSV Upload
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFileSelected(true);
+      setCSVFile(file);
+    } else {
+      setFileSelected(false);
+      message.error("No file selected.");
+    }
+  };
+
+  const handleCSVChange = async () => {
+    if (csvFile) {
+      Papa.parse(csvFile, {
+        header: true,
+        complete: (results) => {
+          setCSVData(results.data);
+          console.log("CSV Data: ", results.data);
+          setContentModalOpen(true);
+        },
+        error: (error) => {
+          console.error("Error parsing CSV: ", error);
+          message.error("Error parsing CSV file.");
+        }
+      });
+    } else {
+      console.error("No file selected.");
+      message.error("No file selected.");
+    }
+  };
+  
+  const handleUploadIsolates = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      };
+  
+      for (const record of csvData) {
+        const {
+          id,
+          accession_no,
+          code,
+          genus,
+          species,
+          access_level,
+          organism_type,
+          sample_type,
+          host_type,
+          host_genus,
+          host_species,
+          method,
+          sampling_point_description,
+          cave_code,
+          cave_name,
+          location_code,
+          town,
+          province,
+          institution_code,
+          institution_name,
+          collection_code,
+          collection_name
+        } = record;
+  
+        const values = {
+          id: id || null, // Use id from CSV if available
+          accession_no: accession_no || null,
+          code: code || null,
+          genus: genus || null,
+          species: species || null,
+          isolate_domain: 'unknown', 
+          isolate_phylum: 'unknown',
+          isolate_class: 'unknown',
+          isolate_order: 'unknown',
+          isolate_family: 'unknown',
+          organism_type: organism_type || null,
+          sample_type: sample_type || null,
+          host_type: host_type || null,
+          host_genus: host_genus || null,
+          host_species: host_species || null,
+          method: method || null,
+          description: sampling_point_description || null,
+          cave_code: cave_code || null,
+          cave_name: cave_name || null,
+          location_code: location_code || null,
+          town: town || null,
+          province: province || null,
+          institution_code: institution_code || null,
+          institution_name: institution_name || null,
+          collection_code: collection_code || null,
+          collection_name: collection_name || null,
+          access_level: access_level || null,
+          isBatchUpload: true, // Set the flag to indicate batch upload
+        };  
+        await createIsolate(accessToken, values);
+      }
+      messageApi.open({
+        type: "success",
+        content: "Isolates uploaded successfully.",
+      });
+      addNotification({
+        title: "Upload Successful",
+        content: `Uploaded ${csvData.length} isolate(s) successfully.`
+      });
+  
+    } catch (error) {
+      console.error("Error uploading CSV data:", error);
+      messageApi.open({
+        type: "error",
+        content: "Error uploading CSV data. Please try again.",
+      });
+      addNotification({
+        title: "Upload Failed",
+        content: "An error occurred while uploading CSV data."
+      });
+    } finally {
+      setUploadCSVModalOpen(false);
+      setContentModalOpen(false);
+    }
   };
 
   const accessLevelLabels = {
@@ -630,11 +770,136 @@ const AdvancedSearch = () => {
               icon={<UploadOutlined />}
               size="large"
               style={{ display: authenticated ? "inline-block" : "none" }}
-              onClick={() => navigate("/isolate/create")}
+              onClick={(openUploadCSVModal)}
             >
               Upload .csv
             </Button>
-            {/* */}
+
+            <Modal
+              className="advsearch-custom-modal"
+              centered
+              open={uploadCSVModalOpen}
+              onCancel={closeUploadCSVModal}
+              footer={[
+                <>
+                  <Divider className="users-top-divider" />
+                  <form
+                     onSubmit={(e) => {
+                      e.preventDefault(); 
+                      handleCSVChange();
+                    }}
+                  >
+                    <Input
+                      id="input-csv"
+                      placeholder="Upload .csv"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleFileChange}
+                    />
+                    <br /><br />
+                    <Button
+                      className="advsearch-upload-csv-btn"
+                      icon={<UploadOutlined />}
+                      size="large"
+                      style={{ display: authenticated ? "inline-block" : "none" }}
+                      onClick={handleCSVChange}
+                      disabled={!fileSelected}
+                    >
+                      Upload
+                    </Button>
+                  </form>
+                </>
+              ]}
+            >
+              <Space
+                className="modal-wrapper"
+                direction="vertical"
+                align="center"
+              >
+                <span className="modal-title">Upload CSV file</span>                
+              </Space>
+            </Modal>
+
+            {/* Content Modal for displaying CSV data */}
+            <Modal
+              className="advsearch-custom-modal"
+              centered
+              open={contentModalOpen}
+              onCancel={() => setContentModalOpen(false)}
+              footer={[
+                <>
+                  <Button
+                    className="isolate-cancel-modal-btn"
+                    size="large"
+                    style={{ display: authenticated ? "inline-block" : "none" }}
+                    onClick={() => setContentModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="advsearch-add-btn"
+                    size="large"
+                    style={{ display: authenticated ? "inline-block" : "none" }}
+                    onClick={handleUploadIsolates}
+                  >
+                    Confirm Upload
+                  </Button>
+                </>
+                
+              ]}
+              
+            >
+              <Space
+                className="modal-wrapper"
+                direction="vertical"
+                align="center"
+              >
+                <span className="modal-title">Upload the following isolates?</span>
+                <div className="upload-isolates-table">
+                  {csvData.length > 0 && (
+                    <div>
+                      {csvData.map((record, index) => {
+                        const { code, genus, species, cave_name, town, province, institution_name, collection_name} = record;
+                        return (
+                          <div key={index} className="isolates-table-record">
+                            <div className="isolates-table-info">
+                              <span
+                              >
+                                <b>
+                                  <i>
+                                    {genus} {species}
+                                  </i>
+                                </b>                                
+                              </span>
+                              <span>Code: {code}</span>
+                              <span>Cave: {cave_name}</span>
+                              <span>Location: {town}, {province}</span>
+                              <span>Institution: {institution_name}</span>
+                              <span>Collection: {collection_name}</span>
+                              <br/>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </Space>
+            </Modal>
+            
+            {/* <label 
+              for="upload-csv" 
+              className="advsearch-csv-btn"
+              icon={<UploadOutlined />}
+              size="large"
+              style={{ display: authenticated ? "inline-block" : "none" }}
+              placeholder="Upload .csv"
+            >
+              <UploadOutlined />
+              Upload .csv
+              <Input type="file" accept=".csv" id="upload-csv" />
+            </label> */}
+            
 
             <Input
               className="advsearch-search-bar"

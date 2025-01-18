@@ -252,9 +252,169 @@ const getIsolateByKeyword = async (req, res, next) => {
   }
 };
 
+// Working clean
+// const createIsolate = async (req, res, next) => {
+//   try {
+//     const {
+//       genus,
+//       species,
+//       isolate_domain,
+//       isolate_phylum,
+//       isolate_class,
+//       isolate_order,
+//       isolate_family,
+//       organism_type,
+//       sample_type,
+//       host_type,
+//       host_genus,
+//       host_species,
+//       method,
+//       institution_name,
+//       collection_name,
+//       cave_name,
+//       description,
+//       access_level,
+//     } = req.body;
+
+//     // Check for missing required fields
+//     if (
+//       !genus ||
+//       !species ||
+//       !isolate_domain ||
+//       !isolate_phylum ||
+//       !isolate_class ||
+//       !isolate_order ||
+//       !isolate_family ||
+//       !organism_type ||
+//       !sample_type ||
+//       !host_type ||
+//       !host_genus ||
+//       !host_species ||
+//       !method ||
+//       !institution_name ||
+//       !collection_name ||
+//       !cave_name ||
+//       !description ||
+//       !access_level
+//     ) {
+//       const error = new Error("Missing required fields.");
+//       error.status = 400;
+//       throw error;
+//     }
+//     const organism = await Organism.findOne({
+//       where: {
+//         organism_type: organism_type,
+//       },
+//     });
+
+//     const sample = await Sample.findOne({
+//       where: {
+//         sample_type: sample_type,
+//       },
+//     });
+
+//     const host = await Host.findOne({
+//       where: {
+//         host_type: host_type,
+//         host_genus: host_genus,
+//         host_species: host_species,
+//       },
+//     });
+
+//     const foundMethod = await Method.findOne({
+//       where: {
+//         method: method,
+//       },
+//     });
+
+//     const cave = await Cave.findOne({
+//       where: {
+//         cave_name: { [Op.eq]: cave_name },
+//       },
+//     });
+
+//     const insti = await Institution.findOne({
+//       where: {
+//         institution_name: institution_name,
+//       },
+//     });
+
+//     const coll = await Collection.findOne({
+//       where: {
+//         collection_name: collection_name,
+//       },
+//     });
+
+//     const samplingPoint = await SamplingPoint.findOne({
+//       where: {
+//         description: description,
+//       },
+//     });
+
+//     if (
+//       !organism ||
+//       !sample ||
+//       !host ||
+//       !foundMethod ||
+//       !cave ||
+//       !insti ||
+//       !coll ||
+//       !samplingPoint
+//     ) {
+//       const missingEntities = [];
+//       if (!organism) missingEntities.push("Organism");
+//       if (!sample) missingEntities.push("Sample");
+//       if (!host) missingEntities.push("Host");
+//       if (!foundMethod) missingEntities.push("Method");
+//       if (!cave) missingEntities.push("Cave");
+//       if (!samplingPoint) missingEntities.push("Sampling Point");
+//       if (!insti) missingEntities.push("Institution");
+//       if (!coll) missingEntities.push("Collection");
+
+//       const missingEntitiesString = missingEntities.join(", ");
+
+//       const error = new Error(
+//         `${missingEntitiesString} not found in the database`
+//       );
+//       error.status = 404;
+//       throw error;
+//     }
+
+//     const newIsolate = await Isolate.create({
+//       genus,
+//       species,
+//       isolate_domain,
+//       isolate_phylum,
+//       isolate_class,
+//       isolate_order,
+//       isolate_family,
+//       organism_id: organism.id,
+//       sample_id: sample.id,
+//       host_id: host.id,
+//       method_id: foundMethod.id,
+//       cave_id: cave.id,
+//       sampling_point_id: samplingPoint.id,
+//       institution_id: insti.id,
+//       collection_id: coll.id,
+//       access_level,
+//     });
+
+//     logConfig.info("Isolate created in the database.");
+//     res.status(201).json({
+//       message: "Isolate Created.",
+//       data: newIsolate,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const createIsolate = async (req, res, next) => {
   try {
     const {
+      id,
+      code,
+      accession_no,
       genus,
       species,
       isolate_domain,
@@ -273,113 +433,80 @@ const createIsolate = async (req, res, next) => {
       cave_name,
       description,
       access_level,
+      isBatchUpload,
     } = req.body;
 
     // Check for missing required fields
-    if (
-      !genus ||
-      !species ||
-      !isolate_domain ||
-      !isolate_phylum ||
-      !isolate_class ||
-      !isolate_order ||
-      !isolate_family ||
-      !organism_type ||
-      !sample_type ||
-      !host_type ||
-      !host_genus ||
-      !host_species ||
-      !method ||
-      !institution_name ||
-      !collection_name ||
-      !cave_name ||
-      !description ||
-      !access_level
-    ) {
-      const error = new Error("Missing required fields.");
+    const requiredFields = [
+      'genus',
+      'species',
+      'isolate_domain',
+      'isolate_phylum',
+      'isolate_class',
+      'isolate_order',
+      'isolate_family',
+      'organism_type',
+      'sample_type',
+      'host_type',
+      'host_genus',
+      'host_species',
+      'method',
+      'institution_name',
+      'collection_name',
+      'cave_name',
+      'description',
+      'access_level',
+    ];
+
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    if (missingFields.length > 0) {
+      const error = new Error(`Missing required fields: ${missingFields.join(', ')}`);
       error.status = 400;
       throw error;
     }
-    const organism = await Organism.findOne({
-      where: {
-        organism_type: organism_type,
-      },
-    });
 
-    const sample = await Sample.findOne({
-      where: {
-        sample_type: sample_type,
-      },
-    });
+    // Check for duplicate code
+    if (code) {
+      const existingIsolate = await Isolate.findOne({
+        where: { code }
+      });
 
-    const host = await Host.findOne({
-      where: {
-        host_type: host_type,
-        host_genus: host_genus,
-        host_species: host_species,
-      },
-    });
+      if (existingIsolate) {
+        const error = new Error("Duplicate code found.");
+        error.status = 400;
+        throw error;
+      }
+    }
 
-    const foundMethod = await Method.findOne({
-      where: {
-        method: method,
-      },
-    });
+    const [organism, sample, host, foundMethod, cave, insti, coll, samplingPoint] = await Promise.all([
+      Organism.findOne({ where: { organism_type } }),
+      Sample.findOne({ where: { sample_type } }),
+      Host.findOne({ where: { host_type, host_genus, host_species } }),
+      Method.findOne({ where: { method } }),
+      Cave.findOne({ where: { cave_name } }),
+      Institution.findOne({ where: { institution_name } }),
+      Collection.findOne({ where: { collection_name } }),
+      SamplingPoint.findOne({ where: { description } })
+    ]);
 
-    const cave = await Cave.findOne({
-      where: {
-        cave_name: { [Op.eq]: cave_name },
-      },
-    });
+    const missingEntities = [
+      !organism && 'Organism',
+      !sample && 'Sample',
+      !host && 'Host',
+      !foundMethod && 'Method',
+      !cave && 'Cave',
+      !insti && 'Institution',
+      !coll && 'Collection',
+      !samplingPoint && 'Sampling Point'
+    ].filter(Boolean);
 
-    const insti = await Institution.findOne({
-      where: {
-        institution_name: institution_name,
-      },
-    });
-
-    const coll = await Collection.findOne({
-      where: {
-        collection_name: collection_name,
-      },
-    });
-
-    const samplingPoint = await SamplingPoint.findOne({
-      where: {
-        description: description,
-      },
-    });
-
-    if (
-      !organism ||
-      !sample ||
-      !host ||
-      !foundMethod ||
-      !cave ||
-      !insti ||
-      !coll ||
-      !samplingPoint
-    ) {
-      const missingEntities = [];
-      if (!organism) missingEntities.push("Organism");
-      if (!sample) missingEntities.push("Sample");
-      if (!host) missingEntities.push("Host");
-      if (!foundMethod) missingEntities.push("Method");
-      if (!cave) missingEntities.push("Cave");
-      if (!samplingPoint) missingEntities.push("Sampling Point");
-      if (!insti) missingEntities.push("Institution");
-      if (!coll) missingEntities.push("Collection");
-
-      const missingEntitiesString = missingEntities.join(", ");
-
-      const error = new Error(
-        `${missingEntitiesString} not found in the database`
-      );
+    if (missingEntities.length > 0) {
+      const error = new Error(`${missingEntities.join(', ')} not found in the database`);
       error.status = 404;
       throw error;
     }
 
-    const newIsolate = await Isolate.create({
+    const isolateData = {
       genus,
       species,
       isolate_domain,
@@ -396,17 +523,170 @@ const createIsolate = async (req, res, next) => {
       institution_id: insti.id,
       collection_id: coll.id,
       access_level,
-    });
+    };
+
+    // Include id, code, and accession_no only for batch uploads
+    if (isBatchUpload) {
+      isolateData.id = id;
+      isolateData.code = code;
+      isolateData.accession_no = accession_no;
+    }
+
+    const newIsolate = await Isolate.create(isolateData);
 
     logConfig.info("Isolate created in the database.");
-    res.status(201).json({
-      message: "Isolate Created.",
-      data: newIsolate,
-    });
+
+    if (isBatchUpload) {
+      res.status(201).json({
+        message: "Isolate Created.",
+        data: newIsolate,
+      });
+    } else {
+      res.status(201).json({
+        message: "Isolate Created. Redirecting to search page...",
+        redirectUrl: '/advsearch'
+      });
+    }
   } catch (error) {
     next(error);
   }
 };
+
+// Redirect not working
+// const createIsolate = async (req, res, next) => {
+//   try {
+//     const {
+//       id,
+//       code,
+//       accession_no,
+//       genus,
+//       species,
+//       isolate_domain,
+//       isolate_phylum,
+//       isolate_class,
+//       isolate_order,
+//       isolate_family,
+//       organism_type,
+//       sample_type,
+//       host_type,
+//       host_genus,
+//       host_species,
+//       method,
+//       institution_name,
+//       collection_name,
+//       cave_name,
+//       description,
+//       access_level,
+//       isBatchUpload,
+//     } = req.body;
+
+//     // Check for missing required fields
+//     const requiredFields = [
+//       'genus',
+//       'species',
+//       'isolate_domain',
+//       'isolate_phylum',
+//       'isolate_class',
+//       'isolate_order',
+//       'isolate_family',
+//       'organism_type',
+//       'sample_type',
+//       'host_type',
+//       'host_genus',
+//       'host_species',
+//       'method',
+//       'institution_name',
+//       'collection_name',
+//       'cave_name',
+//       'description',
+//       'access_level',
+//     ];
+
+//     const missingFields = requiredFields.filter(field => !req.body[field]);
+//     if (missingFields.length > 0) {
+//       const error = new Error(`Missing required fields: ${missingFields.join(', ')}`);
+//       error.status = 400;
+//       throw error;
+//     }
+
+//     // Check for duplicate code
+//     if (code) {
+//       const existingIsolate = await Isolate.findOne({
+//         where: { code }
+//       });
+
+//       if (existingIsolate) {
+//         const error = new Error("Duplicate code found.");
+//         error.status = 400;
+//         throw error;
+//       }
+//     }
+
+//     const [organism, sample, host, foundMethod, cave, insti, coll, samplingPoint] = await Promise.all([
+//       Organism.findOne({ where: { organism_type } }),
+//       Sample.findOne({ where: { sample_type } }),
+//       Host.findOne({ where: { host_type, host_genus, host_species } }),
+//       Method.findOne({ where: { method } }),
+//       Cave.findOne({ where: { cave_name } }),
+//       Institution.findOne({ where: { institution_name } }),
+//       Collection.findOne({ where: { collection_name } }),
+//       SamplingPoint.findOne({ where: { description } })
+//     ]);
+
+//     const missingEntities = [
+//       !organism && 'Organism',
+//       !sample && 'Sample',
+//       !host && 'Host',
+//       !foundMethod && 'Method',
+//       !cave && 'Cave',
+//       !insti && 'Institution',
+//       !coll && 'Collection',
+//       !samplingPoint && 'Sampling Point'
+//     ].filter(Boolean);
+
+//     if (missingEntities.length > 0) {
+//       const error = new Error(`${missingEntities.join(', ')} not found in the database`);
+//       error.status = 404;
+//       throw error;
+//     }
+
+//     const isolateData = {
+//       genus,
+//       species,
+//       isolate_domain,
+//       isolate_phylum,
+//       isolate_class,
+//       isolate_order,
+//       isolate_family,
+//       organism_id: organism.id,
+//       sample_id: sample.id,
+//       host_id: host.id,
+//       method_id: foundMethod.id,
+//       cave_id: cave.id,
+//       sampling_point_id: samplingPoint.id,
+//       institution_id: insti.id,
+//       collection_id: coll.id,
+//       access_level,
+//     };
+
+//     // Include id, code, and accession_no only for batch uploads
+//     if (isBatchUpload) {
+//       isolateData.id = id;
+//       isolateData.code = code;
+//       isolateData.accession_no = accession_no;
+//     }
+
+//     const newIsolate = await Isolate.create(isolateData);
+
+//     logConfig.info("Isolate created in the database.");
+//     res.status(201).json({
+//       message: "Isolate Created.",
+//       data: newIsolate,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 const updateIsolate = async (req, res, next) => {
   try {

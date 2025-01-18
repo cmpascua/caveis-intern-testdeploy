@@ -235,6 +235,40 @@
   margin: 0 0 -10px;
 }
 
+
+.advsearch-csv-btn {
+  margin-right: 10px;
+  background-color: #58703D;
+  color: white;
+  cursor: pointer;
+}
+
+.advsearch-csv-btn:hover {
+  background-color: #A2B68C !important;
+  border-color: transparent !important;
+  color: white !important
+}
+
+.advsearch-upload-csv-btn {
+  background-color: #58703D;
+  color: white;
+}
+
+.advsearch-upload-csv-btn:hover {
+  background-color: #A2B68C !important;
+  border-color: transparent !important;
+  color: white !important
+}
+
+.advsearch-custom-modal {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.upload-isolates-table {
+  margin: 20px;
+}
+
 @media (max-width: 987px) {
   .advsearch-body {
     flex-direction: column;

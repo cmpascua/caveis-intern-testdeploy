@@ -111,31 +111,36 @@ const IsolateInfo = db.define(
 
 // Hooks
 IsolateInfo.afterCreate(async (isolate, options) => {
-  const organism = await Organism.findOne({
-    where: {
-      id: isolate.organism_id,
-    },
-  });
+  if (!isolate.code) {
+    const organism = await Organism.findOne({
+      where: {
+        id: isolate.organism_id,
+      },
+    });
 
-  if (organism) {
-    isolate.code = organism.value + isolate.id;
+    if (organism) {
+      isolate.code = organism.value + isolate.id;
+    }
   }
 
-  const collection = await Collection.findOne({
-    where: {
-      id: isolate.collection_id,
-    },
-  });
-  const institution = await Institution.findOne({
-    where: {
-      id: isolate.institution_id,
-    },
-  });
+  if (!isolate.accession_no) {
+    const collection = await Collection.findOne({
+      where: {
+        id: isolate.collection_id,
+      },
+    });
+    const institution = await Institution.findOne({
+      where: {
+        id: isolate.institution_id,
+      },
+    });
 
-  if (collection && institution) {
-    isolate.accession_no = `${collection.collection_code}-${institution.institution_code}-${isolate.code}`;
-    await isolate.save();
+    if (collection && institution) {
+      isolate.accession_no = `${collection.collection_code}-${institution.institution_code}-${isolate.code}`;
+    }
   }
+  
+  await isolate.save();
 });
 
 IsolateInfo.belongsTo(Method, {
